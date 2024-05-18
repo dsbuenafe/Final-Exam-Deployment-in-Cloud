@@ -1,34 +1,43 @@
 import streamlit as st
 import pandas as pd
-import tensorflow as tf 
+import numpy as np
+from keras.models import load_model
+from sklearn.preprocessing import MinMaxScaler
+
+# Load the trained model
+model_path = 'water_consumption_lstm_model.h5'
+model = load_model(model_path)
+
+# Function to preprocess user input
+def preprocess_input(user_input, scaler):
+    scaled_input = scaler.transform(user_input)
+    return scaled_input
 
 def main():
-    # set up the Streamlit app
-    st.write("Final Exam: Deployment in Cloud")
-    st.write("Name: Dhafny Buenafe and Mayah Catorce")
-    st.write("Section: CPE32S3")
-    st.write("Instructor: Engr. Roman Richard")
+    st.title("Water Consumption Prediction")
 
-# Load the pre-trained model
-model = tf.keras.models.load_model('water_consumption_lstm_model.h5')
+    # Load your dataset for reference
+    # Replace 'your_dataset.csv' with the path to your dataset
+    df = pd.read_csv('water_consumption.csv')
 
-# Define function to make predictions
-def predict_consumption(previous_consumption):
-    predicted_consumption = model.predict(previous_consumption)
-    return predicted_consumption
+    # Assuming 'Date' is one of the columns for user input
+    user_input_date = st.date_input("Select a date:", value=pd.to_datetime('today'))
 
-# Streamlit app
-def main():
-    st.title('Consumption Prediction App')
+    # Additional input fields can be added based on your dataset columns
 
-    # User input for previous consumption
-    previous_consumption = st.number_input('Enter your previous consumption:', value=0.0)
+    # Preprocess the user input
+    user_input = pd.DataFrame({'Date': [user_input_date]})
+    scaler = MinMaxScaler(feature_range=(0, 1))  # Use the same scaler as used during training
+    scaled_input = preprocess_input(user_input, scaler)
 
-    # Predict consumption
-    if st.button('Predict Consumption'):
-        # Make predictions
-        predicted_consumption = predict_consumption(previous_consumption)
-        st.write('Predicted consumption:', predicted_consumption)
+    # Predict water consumption
+    prediction = model.predict(np.reshape(scaled_input, (1, scaled_input.shape[0], scaled_input.shape[1])))
+
+    # Inverse transform the prediction to get the actual consumption value
+    predicted_consumption = scaler.inverse_transform(prediction.reshape(-1, 1))
+
+    st.subheader("Predicted Water Consumption:")
+    st.write(predicted_consumption[0][0])
 
 if __name__ == "__main__":
     main()
