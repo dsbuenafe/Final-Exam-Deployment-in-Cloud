@@ -14,16 +14,11 @@ scaler = MinMaxScaler()
 
 # Function to preprocess data and make predictions
 def predict_water_consumption(input_data):
-    # Ensure input_data is a 2D array
-    if input_data.ndim == 1:
-        input_data = input_data.reshape(-1, 1)
-    # Scale input data
+    # Preprocess input data
     input_data_scaled = scaler.transform(input_data)
-    # Reshape input data for LSTM model
-    input_data_reshaped = np.reshape(input_data_scaled, (1, input_data_scaled.shape[0], input_data_scaled.shape[1]))
+    input_data_reshaped = np.reshape(input_data_scaled, (1, input_data_scaled.shape[0], 1))
     # Make prediction
     predicted_consumption_scaled = model.predict(input_data_reshaped)
-    # Inverse transform the predicted values
     predicted_consumption = scaler.inverse_transform(predicted_consumption_scaled)
     return predicted_consumption
 
@@ -39,9 +34,6 @@ if uploaded_file is not None:
     # Convert Date column to datetime and set as index
     df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
-
-    # Fit the scaler on the data
-    scaler.fit(df.values)
 
     # Show the uploaded data
     st.subheader('Uploaded Data')
