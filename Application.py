@@ -48,6 +48,7 @@ def predict_future_consumption(last_known_data, future_steps=1):
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return None
+
         
 # Streamlit UI
 st.title('Future Water Consumption Predictor')
