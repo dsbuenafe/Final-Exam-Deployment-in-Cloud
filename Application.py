@@ -21,7 +21,7 @@ def main():
     df = pd.read_csv('water_consumption.csv')
     user_input_date = st.date_input("Select a date:", value=pd.to_datetime('today'))
     user_input = pd.DataFrame({'Date': [user_input_date]})
-    user_input['Date'] = pd.to_datetime(user_input['Date']).map(pd.Timestamp.toordinal)  # Example of processing date
+    user_input['Date'] = pd.to_datetime(user_input['Date']).map(pd.Timestamp.toordinal)
     scaled_input = preprocess_input(user_input, scaler)
     prediction = model.predict(np.reshape(scaled_input, (1, scaled_input.shape[0], scaled_input.shape[1])))
     predicted_consumption = scaler.inverse_transform(prediction.reshape(-1, 1))
