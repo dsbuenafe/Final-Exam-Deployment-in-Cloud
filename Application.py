@@ -11,8 +11,6 @@ model = load_model(model_path)
 # Load the scaler
 scaler_path = 'scaler.pkl'  # Update with your scaler path
 scaler = MinMaxScaler()
-scaler_path = 'scaler.save'
-scaler = joblib.load(scaler_path)
 
 # Function to preprocess data and make predictions
 def predict_water_consumption(input_data):
