@@ -1,39 +1,48 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 from keras.models import load_model
+from sklearn.preprocessing import MinMaxScaler
 import joblib
 
-# Load the LSTM model
-model_path = 'water_consumption_lstm_model.h5'
-model = load_model(model_path)
+# Load pre-trained model and scaler
+model_path = 'water_consumption_lstm_model.h5'  # Update with your model path
+scaler_path = 'scaler.save'  # Update with your scaler path
 
-# Load the scaler
-scaler = joblib.load('scaler.save')
+model = load_model(model_path)
+scaler = joblib.load(scaler_path)
 
 # Function to preprocess input data
-def preprocess_input(data):
-    # Your preprocessing steps here
-    return data
+def preprocess_input(data, time_steps):
+    sequences = []
+    for i in range(len(data) - time_steps):
+        seq = data[i:(i + time_steps)]
+        sequences.append(seq)
+    return np.array(sequences)
 
 # Function to make predictions
-def predict_water_consumption(input_data):
-    # Preprocess the input data
-    processed_data = preprocess_input(input_data)
+def predict_consumption(input_data):
+    # Scale the input data
+    scaled_input = scaler.transform(input_data)
+    # Preprocess input data for LSTM
+    X = preprocess_input(scaled_input, time_steps)
     # Make predictions
-    predictions = model.predict(processed_data)
-    # Inverse transform predictions to original scale
-    predictions = scaler.inverse_transform(predictions)
-    return predictions
+    y_pred_scaled = model.predict(X)
+    # Inverse transform the predictions to original scale
+    y_pred = scaler.inverse_transform(y_pred_scaled)
+    return y_pred.flatten()
 
-# Streamlit app layout
+# Streamlit app
 st.title('Water Consumption Prediction')
 
-# Input section
-st.header('Enter Input Data')
-# Here you can add input fields for user to input data
+# User input for historical consumption data
+st.write('Enter the last {} days of water consumption data:'.format(time_steps))
+input_data = []
+for i in range(time_steps):
+    value = st.number_input('Day {}'.format(i+1), min_value=0.0)
+    input_data.append(value)
 
-# Prediction section
-st.header('Predicted Water Consumption')
-# Once you have the input data, call predict_water_consumption function to get predictions
-# Display the predictions using st.write or st.dataframe
+# Predict consumption
+if st.button('Predict'):
+    prediction = predict_consumption(np.array(input_data).reshape(-1, 1))
+    st.write('Predicted water consumption for the next day:', prediction[0])
