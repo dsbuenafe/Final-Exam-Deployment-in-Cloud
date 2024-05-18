@@ -9,7 +9,7 @@ def main():
     st.write("Instructor: Engr. Roman Richard")
 
 # Load the pre-trained model
-model = keras.models.load_model('water_consumption_lstm_model.h5')
+model = tf.keras.models.load_model('water_consumption_lstm_model.h5')
 
 # Define function to make predictions
 def predict_consumption(previous_consumption):
