@@ -56,7 +56,7 @@ st.title('Future Water Consumption Predictor')
 # Sidebar for user input
 st.sidebar.header('User Input')
 last_known_date = st.sidebar.date_input('Last Known Date', datetime.date.today())
-last_known_data = st.sidebar.number_input('Last Known Water Consumption', min_value=0.0, value=0.0, step=0.01)
+last_known_data = st.sidebar.number_input('Last Known Water Consumption in Liters', min_value=0.0, value=0.0, step=0.01)
 future_steps = st.sidebar.slider('Number of Steps into the Future', min_value=1, max_value=100, value=1)
 
 # Predict future consumption
