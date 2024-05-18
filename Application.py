@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
+import joblib
+import numpy as np
 
 # Load the trained LSTM model
 model_path = 'water_consumption_lstm_model.h5'  # Update with your model path
@@ -10,15 +11,20 @@ model = load_model(model_path)
 
 # Load the scaler
 scaler_path = 'scaler.pkl'  # Update with your scaler path
-scaler = MinMaxScaler()
+scaler = joblib.load(scaler_path)
 
 # Function to preprocess data and make predictions
 def predict_water_consumption(input_data):
-    # Preprocess input data
+    # Ensure input_data is a 2D array
+    if input_data.ndim == 1:
+        input_data = input_data.reshape(-1, 1)
+    # Scale input data
     input_data_scaled = scaler.transform(input_data)
-    input_data_reshaped = np.reshape(input_data_scaled, (1, input_data_scaled.shape[0], 1))
+    # Reshape input data for LSTM model
+    input_data_reshaped = np.reshape(input_data_scaled, (1, input_data_scaled.shape[0], input_data_scaled.shape[1]))
     # Make prediction
     predicted_consumption_scaled = model.predict(input_data_reshaped)
+    # Inverse transform the predicted values
     predicted_consumption = scaler.inverse_transform(predicted_consumption_scaled)
     return predicted_consumption
 
