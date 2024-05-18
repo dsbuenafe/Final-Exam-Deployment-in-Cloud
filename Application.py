@@ -68,7 +68,7 @@ if st.sidebar.button('Predict'):
     # Display predictions
     prediction_df = pd.DataFrame({
         'Date': future_dates,
-        'Predicted Consumption': future_predictions()
+        'Predicted Consumption': future_predictions.flatten()
     })
     st.subheader('Future Water Consumption Predictions')
     st.write(prediction_df)
