@@ -28,38 +28,35 @@ def make_predictions(model, X):
     return y_pred_inverse
 
 # Streamlit app
-def main():
-    st.title('Water Consumption Prediction')
+st.title('Water Consumption Prediction')
 
-    # Input parameters
-    st.sidebar.header('Input Parameters')
-    time_steps = st.sidebar.number_input('Time Steps', min_value=1, value=10)
-    # Add more input parameters as needed
+# Input parameters
+time_steps = st.number_input('Time Steps', min_value=1, value=10)
 
-    # Load data
-    uploaded_file = st.sidebar.file_uploader('Upload CSV file', type=['csv'])
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
-        st.subheader('Data Preview')
-        st.write(data.head())
+# Upload data
+uploaded_file = st.file_uploader('Upload CSV file', type=['csv'])
 
-        # Preprocess data
-        X = preprocess_data(data.values, scaler, time_steps)
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
 
-        # Make predictions
-        y_pred = make_predictions(model, X)
+    # Display data
+    st.subheader('Data Preview')
+    st.write(data.head())
 
-        # Display predictions
-        st.subheader('Predictions')
-        prediction_df = pd.DataFrame({
-            'Timestamp': data.index[-len(y_pred):],
-            'Predicted Consumption': y_pred[:, 0]
-        })
-        st.write(prediction_df)
+    # Preprocess data
+    X = preprocess_data(data.values, scaler, time_steps)
 
-        # Plot predictions
-        st.subheader('Predicted Consumption Plot')
-        st.line_chart(prediction_df.set_index('Timestamp'))
+    # Make predictions
+    y_pred = make_predictions(model, X)
 
-if __name__ == '__main__':
-    main()
+    # Display predictions
+    st.subheader('Predictions')
+    prediction_df = pd.DataFrame({
+        'Timestamp': data.index[-len(y_pred):],
+        'Predicted Consumption': y_pred[:, 0]
+    })
+    st.write(prediction_df)
+
+    # Plot predictions
+    st.subheader('Predicted Consumption Plot')
+    st.line_chart(prediction_df.set_index('Timestamp'))
