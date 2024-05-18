@@ -23,26 +23,32 @@ def create_sequences(data, time_steps=1):
 
 # Function to predict future water consumption
 def predict_future_consumption(last_known_data, future_steps=1):
-    # Scale the last known data
-    scaled_last_known_data = scaler.transform(last_known_data.reshape(-1, 1))
-    # Create sequences for prediction
-    input_data = create_sequences(scaled_last_known_data, time_steps=10)
-    # Predict future consumption
-    future_predictions_scaled = []
-    current_sequence = input_data[-1]
-    for i in range(future_steps):
-        # Reshape data for model input
-        current_sequence = current_sequence.reshape((1, 10, 1))
-        # Make prediction
-        future_prediction_scaled = model.predict(current_sequence)[0, 0]
-        # Add prediction to sequence
-        current_sequence = np.roll(current_sequence, -1, axis=1)
-        current_sequence[-1][-1] = future_prediction_scaled
-        future_predictions_scaled.append(future_prediction_scaled)
-    # Inverse transform predictions to original scale
-    future_predictions = scaler.inverse_transform(np.array(future_predictions_scaled).reshape(-1, 1))
-    return future_predictions
-
+    try:
+        # Scale the last known data
+        scaled_last_known_data = scaler.transform(last_known_data.reshape(-1, 1))
+        # Create sequences for prediction
+        input_data = create_sequences(scaled_last_known_data, time_steps=10)
+        if len(input_data) == 0:
+            raise ValueError("Input data is empty.")
+        # Predict future consumption
+        future_predictions_scaled = []
+        current_sequence = input_data[-1]
+        for i in range(future_steps):
+            # Reshape data for model input
+            current_sequence = current_sequence.reshape((1, 10, 1))
+            # Make prediction
+            future_prediction_scaled = model.predict(current_sequence)[0, 0]
+            # Add prediction to sequence
+            current_sequence = np.roll(current_sequence, -1, axis=1)
+            current_sequence[-1][-1] = future_prediction_scaled
+            future_predictions_scaled.append(future_prediction_scaled)
+        # Inverse transform predictions to original scale
+        future_predictions = scaler.inverse_transform(np.array(future_predictions_scaled).reshape(-1, 1))
+        return future_predictions
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return None
+        
 # Streamlit UI
 st.title('Future Water Consumption Predictor')
 
