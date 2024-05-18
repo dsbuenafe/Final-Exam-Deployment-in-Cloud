@@ -2,21 +2,21 @@ import streamlit as st
 import pandas as pd
 import tensorflow as tf
 
-#set up the Streamlit app
+# Set up the Streamlit app
 st.write("Final Exam: Deployment in Cloud")
 st.write("Name: Dhafny Buenafe and Mayah Catorce")
 st.write("Section: CPE32S3")
 st.write("Instructor: Engr. Roman Richard")
-
-def main():
 
 # Load the pre-trained model
 model = tf.keras.models.load_model('water_consumption_lstm_model.h5')
 
 # Define function to make predictions
 def predict_consumption(previous_consumption):
+    # Reshape the input to match the model's expected input shape
+    previous_consumption = np.array([[previous_consumption]])  # Assuming the model expects a 2D array
     predicted_consumption = model.predict(previous_consumption)
-    return predicted_consumption
+    return predicted_consumption[0][0]  # Adjust based on your model's output shape
 
 # Streamlit app
 def main():
