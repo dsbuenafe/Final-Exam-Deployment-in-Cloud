@@ -11,7 +11,6 @@ model = load_model(model_path)
 scaler_path = 'scaler.save'
 scaler = joblib.load(scaler_path)
 
-
 def preprocess_input(user_input, scaler):
 
     user_input_scaled = scaler.transform(user_input)
