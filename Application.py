@@ -1,48 +1,55 @@
 import streamlit as st
+import pandas as pd
 import numpy as np
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
-# Load the LSTM model
-model_path = 'water_consumption_lstm_model.h5'
+# Load the trained LSTM model
+model_path = 'water_consumption_lstm_model.h5'  # Update with your model path
 model = load_model(model_path)
 
 # Load the scaler
-scaler_path = 'scaler.save'
-scaler = joblib.load(scaler_path)
+scaler_path = 'scaler.pkl'  # Update with your scaler path
+scaler = MinMaxScaler()
+scaler.min_, scaler.scale_ = np.load(scaler_path, allow_pickle=True)
 
-# Function to prepare data for prediction
-def prepare_data(data, time_steps=10):
-    scaled_data = scaler.transform(data)
-    sequences = []
-    for i in range(len(data) - time_steps):
-        seq = scaled_data[i:(i + time_steps)]
-        sequences.append(seq)
-    return np.array(sequences)
+# Function to preprocess data and make predictions
+def predict_water_consumption(input_data):
+    # Preprocess input data
+    input_data_scaled = scaler.transform(input_data)
+    input_data_reshaped = np.reshape(input_data_scaled, (1, input_data_scaled.shape[0], 1))
+    # Make prediction
+    predicted_consumption_scaled = model.predict(input_data_reshaped)
+    predicted_consumption = scaler.inverse_transform(predicted_consumption_scaled)
+    return predicted_consumption
 
-# Streamlit App
+# Streamlit app
 st.title('Water Consumption Prediction')
 
-# Input interface
-st.header('Enter Historical Water Consumption Data')
-data_input = st.text_area("Enter historical water consumption data separated by commas")
+# Upload CSV file
+uploaded_file = st.file_uploader("Upload CSV file", type=['csv'])
 
-if st.button("Predict"):
-    # Convert input to numpy array
-    data = np.array(list(map(float, data_input.split(','))))
+if uploaded_file is not None:
+    # Read the uploaded file
+    df = pd.read_csv(uploaded_file)
+    # Convert Date column to datetime and set as index
+    df['Date'] = pd.to_datetime(df['Date'])
+    df.set_index('Date', inplace=True)
 
-    # Prepare data for prediction
-    sequences = prepare_data(data.reshape(-1, 1))
+    # Show the uploaded data
+    st.subheader('Uploaded Data')
+    st.write(df)
 
-    # Make predictions
-    predictions = model.predict(sequences)
+    # Get the latest 10 days' data
+    latest_data = df.tail(10)
 
-    # Inverse transform predictions
-    predictions = scaler.inverse_transform(predictions)
+    # Show the latest data
+    st.subheader('Latest 10 Days Data')
+    st.write(latest_data)
 
-    # Display predicted values
-    st.subheader("Predicted Water Consumption:")
-    st.write(predictions)
-
-    # Plot predictions
-    st.line_chart(predictions)
+    # Predict water consumption
+    predicted_consumption = predict_water_consumption(latest_data.values)
+    
+    # Show the predicted consumption
+    st.subheader('Predicted Water Consumption for the Next Day')
+    st.write(predicted_consumption)
