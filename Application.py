@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import tensorflow as tf 
 
 def main():
     # set up the Streamlit app
@@ -10,7 +9,7 @@ def main():
     st.write("Instructor: Engr. Roman Richard")
 
 # Load the pre-trained model
-model = tf.keras.models.load_model('water_consumption_lstm_model.h5')
+model = keras.models.load_model('water_consumption_lstm_model.h5')
 
 # Define function to make predictions
 def predict_consumption(previous_consumption):
